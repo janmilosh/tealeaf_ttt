@@ -1,5 +1,3 @@
-require 'pry'
-
 puts "Play Tic Tac Toe!"
 
 $game_state = []
@@ -55,6 +53,59 @@ def declare_a_winner?
   end_game
 end
 
+def check_for_block_or_win(needed_total)
+  block_or_win = false
+  WIN_PATTERNS.each do |pattern|
+    total = 0
+    move = nil
+    pattern.each do |item|
+      if $game_state[item][1] == 0
+        move = item
+      end
+      total += $game_state[item][1]
+    end
+    if total == needed_total
+      $game_state[move] = ['O', 1]
+      if needed_total == 20
+        puts "The computer moves to block:"
+      else
+        puts "The computer moves to win:"
+      end
+
+      display_game_board
+      block_or_win = true
+      break
+    end
+  end
+  block_or_win
+end
+
+def find_random_move
+  available_moves = []    
+  $game_state.each_with_index do |item, index|
+    if item[0] == ' '
+      available_moves.push(index)
+    end
+  end
+  if available_moves.length == 0
+    puts "Game ends without a winner!"
+  else
+    $game_state[available_moves.sample] = ['O', 1]
+    puts "The computer makes a random move:"
+    display_game_board
+  end
+end
+
+def make_computer_move 
+  win = check_for_block_or_win(2)
+  if !win
+    block = check_for_block_or_win(20)
+  end
+  if !win && !block 
+    find_random_move 
+  end
+end
+
 def make_player_move
   begin
     try_again = false
@@ -71,63 +122,6 @@ def make_player_move
   end while try_again
 end
 
-def make_computer_move 
-  win = false
-  block = false
-  WIN_PATTERNS.each do |pattern| #to win
-    total = 0
-    win_move = nil
-    pattern.each do |item|
-      if $game_state[item][1] == 0
-        win_move = item
-      end
-      total += $game_state[item][1]
-    end
-    if total == 2
-      $game_state[win_move] = ['O', 1]
-      display_game_board
-      win = true
-      break
-    end
-  end
-
-  if !win
-    WIN_PATTERNS.each do |pattern| #to block
-      total = 0
-      block_move = nil
-      pattern.each do |item|
-        if $game_state[item][1] == 0
-          block_move = item
-        end
-        total += $game_state[item][1]
-      end
-      if total == 20
-        $game_state[block_move] = ['O', 1]
-        display_game_board
-        block = true
-        break
-      end
-    end
-  end
-
-  if !win && !block
-    available_moves = []    
-    $game_state.each_with_index do |item, index|
-      if item[0] == ' '
-        available_moves.push(index)
-      end
-    end
-    if available_moves.length == 0
-      puts "Game ends without a winner!"
-    else
-      $game_state[available_moves.sample] = ['O', 1]
-      puts "Here's the computer's move:"
-      display_game_board
-    end
-  end
-end
-
-
 def play_game
   begin
     create_initial_game_state
@@ -141,7 +135,6 @@ def play_game
       if end_game
         next
       end
-      
       make_computer_move
       end_game = declare_a_winner?
     end
