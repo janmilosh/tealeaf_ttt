@@ -97,7 +97,7 @@ class Board
     block_index
   end
 
-  def winner?(player)
+  def end_game?(player)
     WIN_PATTERNS.each do |pattern|
       test_array = pattern.map{ |x| state[x] }
       if test_array.count(player.marker) == 3
@@ -119,17 +119,17 @@ end
 
 class Game
   def play(player1, player2, board)
-    begin
+    loop do
       player1.make_move(board)
-      if board.winner?(player1)
+      if board.end_game?(player1)
         return
       end
 
       player2.make_move(board)
-      if board.winner?(player2)
+      if board.end_game?(player2)
         return
       end
-    end while true
+    end
   end
 
   def play_again?
