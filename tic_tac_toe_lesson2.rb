@@ -1,23 +1,44 @@
 class Player
-  MARKERS = ['X', 'O']
   attr_accessor :name, :marker
 
-  def initialize(name)
-    @name = name == '' ? 'You' : name
-    @marker = name == 'The Computer' ? MARKERS[1] : MARKERS[0]
+  def initialize(name, marker)
+    @name = name
+    @marker = marker
+  end
+end
+
+
+class Human < Player
+  def initialize(name = "You")
+    super(name, "X")
   end
 
-  def make_move(board)
-    if name == 'The Computer'
-      computer_move(board)
-    else
-      human_move(board)
-    end
+  def move(board)
+    begin
+      try_again = false
+      print "Choose a number (1-9) to place a piece ==> "
+      input = gets.chomp.to_i - 1
+      if board.valid_move?(input)
+        board.state[input] = marker
+        system "clear"
+        board.display("#{name} moved:")
+      else
+        puts "That value isn't an option. Please try again."
+        try_again = true
+      end
+    end while try_again
+  end  
+end
+
+
+class Computer < Player
+  def initialize(name = "The Computer")
+    super(name, "O")
   end
 
-  def computer_move(board)
+  def move(board, human_marker)
     win_move = board.win_or_block_move(marker)
-    block_move = board.win_or_block_move(MARKERS[0])
+    block_move = board.win_or_block_move(human_marker)
     
     if  win_move
       board.state[win_move] = marker
@@ -28,26 +49,6 @@ class Player
     end
     
     board.display("#{name} moved:")
-  end
-
-  def human_move(board)
-    begin
-      try_again = false
-      print "Choose a number (1-9) to place a piece ==> "
-      input = gets.chomp.to_i - 1
-      if valid?(input, board)
-        board.state[input] = marker
-        system "clear"
-        board.display("#{name} moved:")
-      else
-        puts "That value isn't an option. Please try again."
-        try_again = true
-      end
-    end while try_again
-  end  
-
-  def valid?(input, board)
-    input >= 0 && input <= 8 && board.state[input] == ' '
   end
 end
 
@@ -95,14 +96,18 @@ class Board
     block_index
   end
 
+  def valid_move?(input)
+    input >= 0 && input <= 8 && state[input] == ' '
+  end
+
   def end_game?(player)
     WIN_PATTERNS.each do |pattern|
       test_array = pattern.map{ |x| state[x] }
       if test_array.count(player.marker) == 3
-        puts "#{player.name} won!!"
+        puts "#{player.name} won!!\n\n"
         return true
       elsif !spaces_left?
-        puts "No more moves. Game is a draw."
+        puts "No more moves. Game is a draw.\n\n"
         return true
       end
     end
@@ -116,15 +121,15 @@ end
 
 
 class Game
-  def play(player1, player2, board)
+  def play(human, computer, board)
     loop do
-      player1.make_move(board)
-      if board.end_game?(player1)
+      human.move(board)
+      if board.end_game?(human)
         return
       end
 
-      player2.make_move(board)
-      if board.end_game?(player2)
+      computer.move(board, human.marker)
+      if board.end_game?(computer)
         return
       end
     end
@@ -143,15 +148,15 @@ def play_game
   puts "~~~~~~~~~~~~~~~~~\n\n"
 
   print "Please enter your name ==> "
-  player1 = Player.new(gets.chomp)
-  player2 = Player.new('The Computer')
+  human = Human.new(gets.chomp)
+  computer = Computer.new
 
   begin
     board = Board.new
     game = Game.new
     system "clear"
     board.display("Starting a new game:")
-    game.play(player1, player2, board)
+    game.play(human, computer, board)
   end while game.play_again? == "y"
 end
 
