@@ -1,3 +1,3 @@
-#Tealeaf Academy Lesson 1
+#Tealeaf Academy Tic Tac Toe Assignment
 
-##Tic Tac Toe Game assignment
+##For lessons 1 and 2
