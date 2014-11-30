@@ -1,5 +1,3 @@
-require 'pry'
-
 class Player
   MARKERS = ['X', 'O']
   attr_accessor :name, :marker
